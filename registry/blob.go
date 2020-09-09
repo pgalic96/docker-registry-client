@@ -2,8 +2,6 @@ package registry
 
 import (
 	"io"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -58,16 +56,8 @@ func (registry *Registry) UploadBlob(repository string, digest digest.Digest, co
 		upload.GetBody = getBody
 	}
 
-	response, err := registry.Client.Do(upload)
-	resp := *response
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		bodyString := string(bodyBytes)
-		log.Println(bodyString)
-	}
+	resp, err := registry.Client.Do(upload)
+
 	if err != nil {
 		return err
 	}
