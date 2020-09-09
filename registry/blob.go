@@ -58,13 +58,16 @@ func (registry *Registry) UploadBlob(repository string, digest digest.Digest, co
 		upload.GetBody = getBody
 	}
 
-	resp, err := registry.Client.Do(upload)
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
+	response, err := registry.Client.Do(upload)
+	resp := *response
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bodyString := string(bodyBytes)
+		log.Println(bodyString)
 	}
-	bodyString := string(bodyBytes)
-	log.Println(bodyString)
 	if err != nil {
 		return err
 	}
