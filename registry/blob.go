@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/docker/distribution"
 	digest "github.com/opencontainers/go-digest"
@@ -37,10 +38,16 @@ func (registry *Registry) UploadBlob(repository string, digest digest.Digest, co
 	q := uploadUrl.Query()
 	q.Set("digest", digest.String())
 	uploadUrl.RawQuery = q.Encode()
+	var correctUrl string
+	if strings.HasPrefix(uploadUrl.String(), "/v2/") {
+		correctUrl = registry.URL + uploadUrl.String()
+	} else {
+		correctUrl = uploadUrl.String()
+	}
 
-	registry.Logf("registry.blob.upload url=%s repository=%s digest=%s", uploadUrl, repository, digest)
+	registry.Logf("registry.blob.upload url=%s repository=%s digest=%s", correctUrl, repository, digest)
 
-	upload, err := http.NewRequest("PUT", uploadUrl.String(), content)
+	upload, err := http.NewRequest("PUT", correctUrl, content)
 	if err != nil {
 		return err
 	}
